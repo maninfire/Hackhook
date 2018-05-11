@@ -1,5 +1,9 @@
 package com.tsz.hackhook;
 
+import android.app.PendingIntent;
+import android.text.SpannableStringBuilder;
+
+import java.lang.reflect.Field;
 import java.security.PrivateKey;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -19,8 +23,8 @@ public class Hook implements IXposedHookLoadPackage {
 //          return;
 
         if (!TARGET_PACKAGE.equals(lpparam.packageName)) {
-            XposedBridge.log("SendRawSMSMod: ignoring package: " +
-            lpparam.packageName);
+            //XposedBridge.log("SendRawSMSMod: ignoring package: " +
+            //lpparam.packageName);
             return;
         }
 
@@ -159,6 +163,32 @@ public class Hook implements IXposedHookLoadPackage {
 
                     }
                 });*/
+        XposedBridge.log("----------com.a360.zhangzhenguo.hack.中------------");
+        final Class<?> clazz=XposedHelpers.findClass(
+                "android.telephony.SmsManager", lpparam.classLoader);
+        XposedHelpers.findAndHookMethod(clazz, "sendTextMessage", String.class,
+                String.class, String.class, PendingIntent.class,PendingIntent.class,
+                new XC_MethodHook(){
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param)
+                            throws Throwable {
+                        // TODO Auto-generated method stub
+                        //super.beforeHookedMethod(param);
+                        XposedBridge.log("----开始拦截send方法-------");
+                        //Field f=XposedHelpers.findField(clazz, "mText");
+                        //SpannableStringBuilder text=(SpannableStringBuilder) f.get(param.thisObject);
+                        String origMsg=(String) param.args[2];
+
+                        //简单加密运算
+                        char array[]=origMsg.toCharArray();//获取字符数组
+                        for(int i=0;i<array.length;i++){
+                            array[i]=(char) (array[i]^20000);//对每个数组元素进行异或运算
+                        }
+                        String secretMsg=new String(array);
+                        XposedBridge.log("原始短信内容："+origMsg+"\n"+"加密后内容："+secretMsg);
+                        XposedBridge.log("------成功拦截send方法并进行加密------");
+                    }
+                });
         XposedBridge.log("=========开始进入拦截");
         XposedHelpers.findAndHookMethod("com.a360.zhangzhenguo.hack.RSACryptography",
                 lpparam.classLoader,"decrypt", byte[].class, PrivateKey.class,
