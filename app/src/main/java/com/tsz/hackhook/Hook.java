@@ -163,7 +163,25 @@ public class Hook implements IXposedHookLoadPackage {
 
                     }
                 });*/
-        XposedBridge.log("----------com.a360.zhangzhenguo.hack.中------------");
+        XposedBridge.log("----------拦截exec------------");
+        final Class<?> clazs=XposedHelpers.findClass(
+                "java.lang.Runtime", lpparam.classLoader);
+        XposedHelpers.findAndHookMethod(clazs, "exec", String.class,
+                new XC_MethodHook(){
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param)
+                            throws Throwable {
+                        // TODO Auto-generated method stub
+                        //super.beforeHookedMethod(param);
+                        XposedBridge.log("----开始拦截exec方法-------");
+                        //Field f=XposedHelpers.findField(clazz, "mText");
+                        //SpannableStringBuilder text=(SpannableStringBuilder) f.get(param.thisObject);
+                        String origMsg=(String) param.args[0];
+                        XposedBridge.log("command is ："+origMsg+"\n");
+                        XposedBridge.log("------成功拦截exec方法------");
+                    }
+                });
+        XposedBridge.log("----------拦截sendmessage------------");
         final Class<?> clazz=XposedHelpers.findClass(
                 "android.telephony.SmsManager", lpparam.classLoader);
         XposedHelpers.findAndHookMethod(clazz, "sendTextMessage", String.class,
